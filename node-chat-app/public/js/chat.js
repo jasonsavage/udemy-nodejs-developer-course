@@ -17,11 +17,12 @@ var username = 'User';
 socket.on('connect', function () {
     var params = $.deparam(window.location.search);
 
-    socket.emit(JOIN_ROOM, params, function (err) {
+    socket.emit(JOIN_ROOM, params, function (err, room) {
         if(err) {
             alert(err);
             window.location.href = '/';
         } else {
+            $('#room-name').text(room);
             console.log('No Errors')
         }
     });
@@ -61,6 +62,7 @@ var $messageTextbox = $('[name=message]');
 
 $messageForm.on('submit', function (e) {
     e.preventDefault();
+
     socket.emit(CREATE_MESSAGE, {
         from: username,
         text: $messageTextbox.val()

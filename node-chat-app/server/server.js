@@ -33,36 +33,48 @@ io.on(CONNECTION, (socket) => {
             return callback('Name and Room are required');
         }
 
+        const room = params.room.toUpperCase();
+        const user = users.getUserByName(params.name);
+        if(user && user.room === room) {
+            return callback('Name is already taken');
+        }
+
         // join socket.io room
-        socket.join(params.room);
+        socket.join(room);
         users.removeUser(socket.id);
-        users.addUser(socket.id, params.name, params.room);
+        users.addUser(socket.id, params.name, room);
 
         // io.emit -> io.to(room).emit
         // socket.broadcast.emit -> socket.broadcast.to(room).emit
         // socket.emit
 
         // send an updated user list to all user in this room
-        io.to(params.room).emit('updateUserList', users.getUserList(params.room));
+        io.to(room).emit('updateUserList', users.getUserList(room));
 
         socket.emit(NEW_MESSAGE, generateMessage('Admin', 'Welcome to the chat app'));
 
-        socket.broadcast.to(params.room).emit(NEW_MESSAGE, generateMessage('Admin', `${params.name} joined`));
+        socket.broadcast.to(room).emit(NEW_MESSAGE, generateMessage('Admin', `${params.name} joined`));
 
-        callback();
+        callback(null, room);
     })
 
     socket.on(CREATE_MESSAGE, (message, callback) => {
-        console.log(CREATE_MESSAGE, message);
-        io.emit(NEW_MESSAGE, generateMessage(message.from, message.text));
+        const user = users.getUser(socket.id);
 
+        if(user && isRealString(message.text)) {
+            io.to(user.room).emit(NEW_MESSAGE, generateMessage(user.name, message.text));
+        }
+        
         if(callback) {
             callback('This is from the server');
         }
     });
 
     socket.on(CREATE_LOCATION_MESSAGE, (coords) => {
-        io.emit(NEW_LOCATION_MESSAGE, generateLocationMessage('Admin', coords.latitude, coords.longitude));
+        const user = users.getUser(socket.id);
+        if(user) {
+            io.to(user.room).emit(NEW_LOCATION_MESSAGE, generateLocationMessage(user.name, coords.latitude, coords.longitude));
+        }
     });
 
     socket.on(DISCONNECT, () => {

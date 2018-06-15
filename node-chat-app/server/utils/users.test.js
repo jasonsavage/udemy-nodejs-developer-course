@@ -49,20 +49,42 @@ describe('Users', () => {
         expect(users.users.length).toEqual(3);
     });
 
-    it('should find user', () => {
-        // given
-        // when
-        const res = users.getUser(1);
-        // then
-        expect(res.name).toEqual('Mike');
+    describe('getUser', () => {
+        it('should find user', () => {
+            // given
+            // when
+            const res = users.getUser(1);
+            // then
+            expect(res.name).toEqual('Mike');
+        });
+
+        it('should NOT find user', () => {
+            // given
+            // when
+            const res = users.getUser(4);
+            // then
+            expect(res).toEqual(undefined);
+        });
     });
 
-    it('should NOT find user', () => {
-        // given
-        // when
-        const res = users.getUser(4);
-        // then
-        expect(res).toEqual(undefined);
+    describe('getUserByName', () => {
+        it('should find user regardless of case', () => {
+            // given
+            const name = 'MIKE';
+            // when
+            const res = users.getUserByName(name);
+            // then
+            expect(res.name).toEqual('Mike');
+        });
+
+        it('should NOT find user', () => {
+            // given
+            const name = 'Sam';
+            // when
+            const res = users.getUser(name);
+            // then
+            expect(res).toEqual(undefined);
+        });
     });
 
     it('should return names for Node Course', () => {

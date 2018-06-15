@@ -23,6 +23,11 @@ class Users {
     getUser (id) {
         return this.users.filter((u) => u.id === id)[0];
     }
+
+    getUserByName (name) {
+        const username = (name || '').toLowerCase()
+        return this.users.filter((u) => u.name.toLowerCase() === username)[0];
+    }
     
     getUserList (room) {
         const users = this.users.filter((u) => u.room === room);
